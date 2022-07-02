@@ -1,0 +1,43 @@
+# file: webapp.yml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  selector:
+   matchLabels:
+    app: webapp
+  replicas: 2
+  template:
+    metadata:
+     labels:
+       app: webapp
+    spec:
+     containers:
+     - image: ghcr.io/coursar/devops-java-k8s/webapp
+       name: webapp
+       ports:
+       - containerPort: 8080
+       envFrom:
+       - configMapRef:
+           name: db-config
+       env:  
+       - name: CATALINA_OPTS
+         value: -DJDBC_DATABASE_URL="jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)?user=app&password=$(DB_PASS)"
+...
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  type: NodePort
+  selector:
+   app: webapp
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+...
+
