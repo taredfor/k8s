@@ -15,16 +15,18 @@ spec:
        app: webapp
     spec:
      containers:
-     - image: ghcr.io/coursar/devops-java-k8s/webapp
+     - image: ghcr.io/taredfor/devops-java-k8s/webapp
        name: webapp
        ports:
        - containerPort: 8080
        envFrom:
-       - configMapRef:
-           name: db-config
+        - secretRef:
+           name: db-secret
        env:  
        - name: CATALINA_OPTS
          value: -DJDBC_DATABASE_URL="jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)?user=app&password=$(DB_PASS)"
+     imagePullSecrets:
+       - name: github-packages
 ...
 ---
 apiVersion: v1
