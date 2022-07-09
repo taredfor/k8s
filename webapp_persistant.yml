@@ -1,0 +1,53 @@
+# file: webapp.yml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  selector:
+   matchLabels:
+    app: webapp
+  replicas: 1
+  template:
+    metadata:
+     labels:
+       app: webapp
+    spec:
+      containers:
+       - image: ghcr.io/coursar/devops-spring-k8s/webapp:latest
+         name: webapp
+         ports:
+          - containerPort: 8080
+         volumeMounts:
+          - name: config
+            mountPath: /app/config
+            readOnly: true
+          - name: nfs-share
+            mountPath: /app/media
+      volumes:
+      - name: config
+        secret:
+          secretName: webapp-secret
+          optional: false
+      - name: nfs-share
+        persistentVolumeClaim:
+          claimName: nfs-claim      
+      imagePullSecrets:
+         - name: github-packages
+...
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  type: NodePort
+  selector:
+   app: webapp
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+...
+
